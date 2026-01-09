@@ -286,7 +286,7 @@ body {
 .accordion-body { padding: 14px 16px; background: #fff; max-height: 0; opacity: 0; overflow: hidden; transition: max-height .35s ease, opacity .25s ease, background-color .25s ease; }
 .accordion-item:not(.open) .accordion-body { padding: 0; }
 .accordion-grid .accordion-body { flex: 0 0 auto; }
-.accordion-item.open .accordion-body { max-height: 5000px; opacity: 1; background: #fff; }
+.accordion-item.open .accordion-body { max-height: 50000px; opacity: 1; background: #fff; }
 .accordion-body .card { margin-bottom: 12px; }
 .accordion#temarioAcc .accordion-item.open { border-color: #1368ff; box-shadow: 0 8px 22px rgba(19, 104, 255, 0.22); background: linear-gradient(180deg, rgba(19, 104, 255, 0.10), rgba(255,255,255,0)); }
 .accordion#temarioAcc .accordion-item.open .accordion-button { color: #1368ff; background: rgba(255,255,255,0.96); border-color: #1368ff; }

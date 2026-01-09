@@ -1146,11 +1146,44 @@ window.loadQuiz = (moduleId) => {
 
   container.innerHTML = ""; // Clear existing
 
+  let score = 0;
+  let answeredCount = 0;
+  const totalQuestions = data.questions.length;
+
   // Header
   const header = el("div", { class: "quiz-header" });
   header.appendChild(el("h5", { text: data.title }));
   header.appendChild(el("p", { text: data.instructions }));
   container.appendChild(header);
+
+  const showResults = () => {
+    const resultDiv = el("div", { class: "quiz-result", style: "margin-top: 24px; text-align: center; padding: 20px; background: #f8f9fa; border-radius: 12px; border: 1px solid var(--border);" });
+    
+    const scorePercent = Math.round((score / totalQuestions) * 100);
+    const scoreText = el("h4", { text: `Tu puntaje: ${score} / ${totalQuestions} (${scorePercent}%)` });
+    scoreText.style.color = "var(--primary)";
+    scoreText.style.marginBottom = "16px";
+    
+    let feedbackMsg = "¡Sigue practicando!";
+    if (scorePercent === 100) feedbackMsg = "¡Excelente! Dominas este tema.";
+    else if (scorePercent >= 80) feedbackMsg = "¡Muy bien! Casi perfecto.";
+    else if (scorePercent >= 60) feedbackMsg = "Vas por buen camino.";
+    
+    resultDiv.appendChild(scoreText);
+    resultDiv.appendChild(el("p", { text: feedbackMsg, style: "margin-bottom: 20px; color: var(--text);" }));
+    
+    const restartBtn = el("button", { 
+      class: "btn btn-primary", 
+      text: "Reiniciar autoevaluación" 
+    });
+    restartBtn.onclick = () => loadQuiz(moduleId);
+    
+    resultDiv.appendChild(restartBtn);
+    container.appendChild(resultDiv);
+    
+    // Scroll to results
+    setTimeout(() => resultDiv.scrollIntoView({ behavior: "smooth", block: "center" }), 100);
+  };
 
   // Questions
   data.questions.forEach((q, idx) => {
@@ -1170,7 +1203,10 @@ window.loadQuiz = (moduleId) => {
         btn.classList.add("selected");
 
         // Check correct
+        let isCorrect = false;
         if (opt.isCorrect) {
+          isCorrect = true;
+          score++;
           btn.classList.add("correct");
           feedbackDiv.classList.add("show", "success");
           feedbackDiv.textContent = "¡Correcto! " + q.feedback;
@@ -1182,6 +1218,11 @@ window.loadQuiz = (moduleId) => {
           Array.from(optsDiv.children).forEach((b, i) => {
              if (q.options[i].isCorrect) b.classList.add("correct");
           });
+        }
+        
+        answeredCount++;
+        if (answeredCount === totalQuestions) {
+          showResults();
         }
       };
       optsDiv.appendChild(btn);
