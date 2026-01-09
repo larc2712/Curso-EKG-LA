@@ -30,9 +30,16 @@ body {
   padding: 16px;
   border-bottom: 1px solid var(--border);
   background: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
-.site-header h1 { margin: 0 0 8px; font-size: 28px; }
-.site-header p { margin: 0; color: var(--muted); }
+.header-content h1 { margin: 0 0 8px; font-size: 28px; }
+.header-content p { margin: 0; color: var(--muted); }
+.header-logo {
+  height: 80px; /* Aprox 2cm */
+  width: auto;
+}
 
 .site-nav {
   display: flex;
@@ -42,6 +49,8 @@ body {
   background: #fff;
   transition: background-color .25s ease, box-shadow .25s ease, border-color .25s ease;
 }
+/* .nav-logo removed as it is now in header */
+
 .site-nav a {
   display: inline-block;
   padding: 10px 14px;
