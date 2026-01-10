@@ -267,19 +267,99 @@ body {
 
 /* Simple grid utilities */
 .row { display: grid; grid-template-columns: 1fr; gap: 12px; }
-.row.three { grid-template-columns: repeat(3, 1fr); }
+
 @media (min-width: 768px) {
-  .col-md-4 { grid-column: span 1; }
-  .row.col-3, .row .col-md-4 { }
+  /* Default to 12 column grid for desktop layout flexibility */
+  .row { grid-template-columns: repeat(12, 1fr); }
+  
+  /* Specific overrides for 3-column layouts */
+  .row.three { grid-template-columns: repeat(3, 1fr); }
+  
+  /* Column spans for 12-grid */
+  .row:not(.three) .col-md-4 { grid-column: span 4; }
+  .col-md-8 { grid-column: span 8; }
+  .offset-md-2 { grid-column-start: 3; }
+  
+  /* Column spans for 3-grid */
+  .row.three .col-md-4 { grid-column: span 1; }
 }
+
 @media (min-width: 992px) {
   .col-lg-5 { grid-column: span 5; }
   .col-lg-7 { grid-column: span 7; }
 }
 .col { }
 
-/* Accordion */
-.accordion { border: 2px solid var(--border); border-radius: 22px; background: #fff; box-shadow: var(--shadow); padding: 8px; }
+/* Mobile header adjustments */
+@media (max-width: 600px) {
+  .site-header {
+    padding: 12px;
+  }
+  .header-content h1 {
+    font-size: 22px;
+    margin-bottom: 4px;
+  }
+  .header-content p {
+    font-size: 14px;
+    line-height: 1.3;
+  }
+  .header-logo {
+    height: 60px; /* Smaller logo on mobile */
+  }
+  
+  /* Stack buttons in hero on very small screens */
+  .hero .btn {
+    width: 100%;
+    margin-bottom: 8px;
+    margin-left: 0 !important;
+    text-align: center;
+  }
+  .hero .btn + .btn {
+    margin-left: 0;
+  }
+  
+  /* Adjust quiz padding */
+  .quiz-question {
+    padding: 12px;
+  }
+  
+  /* Better nav for mobile */
+  .site-nav {
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 8px; /* Space for scrollbar if visible */
+  }
+}
+
+/* Progress Bar */
+#progress-container {
+  width: 100%;
+  height: 8px;
+  background-color: #e9ecef;
+  position: sticky;
+  top: 0; /* Adjust if header is sticky */
+  z-index: 1001;
+  display: none; /* Hidden by default, shown via JS if logged in */
+}
+#progress-bar {
+  height: 100%;
+  background-color: var(--success); /* Green for progress */
+  width: 0%;
+  transition: width 0.4s ease;
+  background-image: linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);
+  background-size: 1rem 1rem;
+}
+.site-nav {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+/* If progress bar is present, move nav down slightly or keep it stacked */
+body.has-progress .site-nav {
+  top: 8px;
+}
+
 .accordion-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; padding: 12px; }
 @media (max-width: 1024px) { .accordion-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 640px) { .accordion-grid { grid-template-columns: 1fr; } }
