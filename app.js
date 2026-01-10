@@ -29,6 +29,9 @@ const STORE = {
 };
 const DEMO_CREDS = { password: "Curso2026!" };
 const checkCredentials = (u, p) => {
+  // Usuario especial Creador
+  if (u === "Creador" && p === "12345678") return true;
+
   if (p !== DEMO_CREDS.password) return false;
   const match = u.match(/^LatidoAsistido(\d+)$/);
   if (!match) return false;
@@ -346,6 +349,9 @@ const setupAuth = () => {
   const courseForm = document.querySelector('form#auth-form');
   if (courseForm) handleSubmit(courseForm, () => {
     updateProtectedViews();
+    // Iniciar tracker de progreso inmediatamente tras login
+    if (typeof ProgressTracker !== 'undefined') ProgressTracker.init();
+    
     const loginArea = qs('#login-area');
     const ok = document.querySelector('#login-area .auth-ok') || el('p', { class: 'muted auth-ok', text: 'Acceso concedido' });
     ok.style.color = '#1368ff';
@@ -1130,112 +1136,6 @@ const QUIZ_DATA = {
   }
 };
 
-const ProgressTracker = {
-  data: { modules: [], videos: [], readings: [], quizzes: [] },
-  totalItems: 0,
-  username: null,
-  
-  init() {
-    if (!STORE.auth || !STORE.auth.user) return;
-    this.username = STORE.auth.user;
-    this.load();
-    this.injectUI();
-    this.calcTotal(); // Try to calc if on course page
-    this.updateUI();
-    this.attachListeners();
-  },
-  
-  load() {
-    const saved = localStorage.getItem(`ekg_progress_${this.username}`);
-    if (saved) {
-      try { this.data = JSON.parse(saved); } catch {}
-    }
-    // Also load totalItems if saved, in case we are on index page
-    const savedTotal = localStorage.getItem(`ekg_total_items`);
-    if (savedTotal) this.totalItems = parseInt(savedTotal, 10);
-  },
-  
-  save() {
-    if (!this.username) return;
-    localStorage.setItem(`ekg_progress_${this.username}`, JSON.stringify(this.data));
-  },
-  
-  track(type, id) {
-    if (!this.username) return;
-    if (!this.data[type]) this.data[type] = [];
-    if (!this.data[type].includes(id)) {
-      this.data[type].push(id);
-      this.save();
-      this.updateUI();
-    }
-  },
-  
-  calcTotal() {
-    // Only works if content is present (curso.html)
-    const modules = document.querySelectorAll('.accordion-item');
-    if (modules.length > 0) {
-      let v = document.querySelectorAll('iframe.video, iframe.video-small').length;
-      let r = document.querySelectorAll('a[href$=".pdf"]').length;
-      let q = document.querySelectorAll('.quiz-container').length; // or Object.keys(QUIZ_DATA).length
-      let m = modules.length;
-      
-      this.totalItems = m + v + r + q;
-      localStorage.setItem(`ekg_total_items`, this.totalItems);
-    }
-  },
-  
-  updateUI() {
-    const bar = document.getElementById('progress-bar');
-    if (!bar || this.totalItems === 0) return;
-    
-    const completed = 
-      (this.data.modules?.length || 0) + 
-      (this.data.videos?.length || 0) + 
-      (this.data.readings?.length || 0) + 
-      (this.data.quizzes?.length || 0);
-      
-    const pct = Math.min(100, Math.round((completed / this.totalItems) * 100));
-    bar.style.width = `${pct}%`;
-    bar.title = `Progreso: ${pct}% (${completed}/${this.totalItems})`;
-  },
-  
-  injectUI() {
-    if (document.getElementById('progress-container')) {
-        document.getElementById('progress-container').style.display = 'block';
-        document.body.classList.add('has-progress');
-        return;
-    }
-    const cont = document.createElement('div');
-    cont.id = 'progress-container';
-    cont.innerHTML = '<div id="progress-bar"></div>';
-    
-    // Insert before nav
-    const nav = document.querySelector('.site-nav');
-    if (nav) {
-      nav.parentNode.insertBefore(cont, nav);
-      document.body.classList.add('has-progress');
-      cont.style.display = 'block';
-    }
-  },
-  
-  attachListeners() {
-     // PDF clicks
-     document.body.addEventListener('click', (e) => {
-       if (e.target.matches('a[href$=".pdf"]')) {
-         this.track('readings', e.target.getAttribute('href'));
-       }
-     });
-     
-     // Video blur hack
-     window.addEventListener('blur', () => {
-       if (document.activeElement && document.activeElement.tagName === 'IFRAME') {
-         // Try to find a unique ID for the iframe. Src is good.
-         this.track('videos', document.activeElement.src);
-       }
-     });
-  }
-};
-
 window.loadQuiz = (moduleId) => {
   const container = document.getElementById(`quiz-${moduleId.replace('_', '-')}`);
   const data = QUIZ_DATA[moduleId];
@@ -1243,7 +1143,6 @@ window.loadQuiz = (moduleId) => {
   if (!container) return;
   
   if (!data) {
-    // Si no hay datos cargados aún para este módulo
     const btn = container.querySelector("button");
     if (btn) {
       const originalText = btn.textContent;
@@ -1257,7 +1156,7 @@ window.loadQuiz = (moduleId) => {
     return;
   }
 
-  container.innerHTML = ""; // Clear existing
+  container.innerHTML = ""; 
 
   let score = 0;
   let answeredCount = 0;
@@ -1272,11 +1171,6 @@ window.loadQuiz = (moduleId) => {
   const showResults = () => {
     const resultDiv = el("div", { class: "quiz-result", style: "margin-top: 24px; text-align: center; padding: 20px; background: #f8f9fa; border-radius: 12px; border: 1px solid var(--border);" });
     
-    // Track completion
-    if (typeof ProgressTracker !== 'undefined') {
-       ProgressTracker.track('quizzes', moduleId);
-    }
-
     const scorePercent = Math.round((score / totalQuestions) * 100);
     const scoreText = el("h4", { text: `Tu puntaje: ${score} / ${totalQuestions} (${scorePercent}%)` });
     scoreText.style.color = "var(--primary)";
@@ -1299,7 +1193,6 @@ window.loadQuiz = (moduleId) => {
     resultDiv.appendChild(restartBtn);
     container.appendChild(resultDiv);
     
-    // Scroll to results
     setTimeout(() => resultDiv.scrollIntoView({ behavior: "smooth", block: "center" }), 100);
   };
 
@@ -1314,16 +1207,10 @@ window.loadQuiz = (moduleId) => {
     q.options.forEach((opt) => {
       const btn = el("button", { class: "quiz-option", text: opt.text });
       btn.onclick = () => {
-        // Disable all buttons in this question
         Array.from(optsDiv.children).forEach(b => b.disabled = true);
-        
-        // Show selection style
         btn.classList.add("selected");
 
-        // Check correct
-        let isCorrect = false;
         if (opt.isCorrect) {
-          isCorrect = true;
           score++;
           btn.classList.add("correct");
           feedbackDiv.classList.add("show", "success");
@@ -1332,7 +1219,6 @@ window.loadQuiz = (moduleId) => {
           btn.classList.add("incorrect");
           feedbackDiv.classList.add("show", "error");
           feedbackDiv.textContent = "Incorrecto. " + q.feedback;
-          // Highlight correct one
           Array.from(optsDiv.children).forEach((b, i) => {
              if (q.options[i].isCorrect) b.classList.add("correct");
           });
@@ -1357,7 +1243,6 @@ const start = () => {
     setupAccordions(); 
     setupAuth(); 
     updateProtectedViews();
-    if (typeof ProgressTracker !== 'undefined') ProgressTracker.init();
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
