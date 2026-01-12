@@ -48,6 +48,7 @@ body {
   border-bottom: 1px solid var(--border);
   background: #fff;
   transition: background-color .25s ease, box-shadow .25s ease, border-color .25s ease;
+  align-items: center; /* Asegura alineación vertical */
 }
 /* .nav-logo removed as it is now in header */
 
@@ -60,12 +61,27 @@ body {
   text-decoration: none;
   background: var(--panel);
   box-shadow: var(--shadow);
-  transition: color .2s ease, border-color .2s ease, transform .15s ease;
+  transition: color .2s ease, border-color .2s ease, transform .15s ease, background-color .2s ease;
 }
 .site-nav a.active { border-color: var(--primary); color: var(--primary); }
 .site-nav.accent { border-bottom-color: var(--accent); }
 .site-nav.accent a.active { border-color: var(--accent); color: var(--accent); }
 .site-nav.accent a.active:hover { transform: translateY(-1px); }
+
+/* Botón de inscripción destacado */
+.site-nav a.nav-cta {
+  background-color: #e63946; /* Rojo vibrante */
+  color: #ffffff;
+  border-color: #e63946;
+  font-weight: 600;
+  margin-left: auto; /* Empuja el botón a la derecha si hay espacio, o simplemente lo separa */
+}
+.site-nav a.nav-cta:hover {
+  background-color: #d62828;
+  border-color: #d62828;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(230, 57, 70, 0.3);
+}
 
 .container {
   width: 100%;
